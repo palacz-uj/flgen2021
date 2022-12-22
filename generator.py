@@ -524,7 +524,7 @@ RETURN type(e), b, c, n, m
 class ExampleGrammar(FloorLayoutGrammar):
     """
     A working example of a floor layout grammar, which implements graph
-    rules displayed in Fig. 6 in the paper. All methods follow the same
+    rules displayed in Fig. 7 in the paper. All methods follow the same
     sequence of steps:
 
     1) Find a match for rule's left-hand side and remember it for
@@ -605,69 +605,69 @@ class ExampleGrammar(FloorLayoutGrammar):
 
     def rule_p2(self):
         """
-        Split a sleeping area (sa) into a bedroom (bed1), a toilet (toi)
-        and another bedroom (bed2).
+        Split a sleeping area (sa) into a bedroom (bed1), a bathroom
+        (bath) and another bedroom (bed2).
         """
 
         bed_ysize_min = 2
-        toi_ysize_min = 1
-        toi_ysize_max = 2
-        ysize_min = 2 * bed_ysize_min + toi_ysize_min
+        bath_ysize_min = 1
+        bath_ysize_max = 2
+        ysize_min = 2 * bed_ysize_min + bath_ysize_min
 
         rs = self.query_match_rect('Sleeping area', 'b2.y2 - b2.y1 >= {0}'.format(ysize_min))
         if len(rs) == 0:
             return None
         (sa, llx, lly, urx, ury) = choice(rs)
 
-        extra = (ury - lly) - 2 * bed_ysize_min - toi_ysize_min
-        toi_ysize = toi_ysize_min + randint(0, min(extra, toi_ysize_max - toi_ysize_min))
-        extra = (ury - lly) - 2 * bed_ysize_min - toi_ysize
+        extra = (ury - lly) - 2 * bed_ysize_min - bath_ysize_min
+        bath_ysize = bath_ysize_min + randint(0, min(extra, bath_ysize_max - bath_ysize_min))
+        extra = (ury - lly) - 2 * bed_ysize_min - bath_ysize
         bed1_ysize = bed_ysize_min + randint(0, extra)
 
         bed1 = self.query_create_rect('bedroom', llx, lly, urx, lly + bed1_ysize)
-        toi = self.query_create_rect('toilet', llx, lly + bed1_ysize, urx, lly + bed1_ysize + toi_ysize)
-        bed2 = self.query_create_rect('bedroom', llx, lly + bed1_ysize + toi_ysize, urx, ury)
-        self.query_create_edge('acc', bed1.b1_id, toi.b3_id)
-        self.query_create_edge('adj', toi.b1_id, bed2.b3_id)
+        bath = self.query_create_rect('bathroom', llx, lly + bed1_ysize, urx, lly + bed1_ysize + bath_ysize)
+        bed2 = self.query_create_rect('bedroom', llx, lly + bed1_ysize + bath_ysize, urx, ury)
+        self.query_create_edge('acc', bed1.b1_id, bath.b3_id)
+        self.query_create_edge('adj', bath.b1_id, bed2.b3_id)
 
         self.query_embed_western(sa.id, bed1.id)
-        self.query_embed_western(sa.id, toi.id)
+        self.query_embed_western(sa.id, bath.id)
         self.query_embed_western(sa.id, bed2.id)
 
         self.query_delete_rect(sa.id)
 
         return 'sub-areas created, cuts at Y={0}, Y={1}'.format(
-                    lly + bed1_ysize, lly + bed1_ysize + toi_ysize)
+                    lly + bed1_ysize, lly + bed1_ysize + bath_ysize)
 
     def rule_p3(self):
         """
-        Split a sleeping area (sa) into a toilet (toi) and a bedroom
+        Split a sleeping area (sa) into a bathroom (bath) and a bedroom
         (bed).
         """
 
         bed_ysize_min = 2
-        toi_ysize_min = 1
-        toi_ysize_max = 2
-        ysize_min = bed_ysize_min + toi_ysize_min
+        bath_ysize_min = 1
+        bath_ysize_max = 2
+        ysize_min = bed_ysize_min + bath_ysize_min
 
         rs = self.query_match_rect('Sleeping area', 'b2.y2 - b2.y1 >= {0}'.format(ysize_min))
         if len(rs) == 0:
             return None
         (sa, llx, lly, urx, ury) = choice(rs)
 
-        extra = (ury - lly) - bed_ysize_min - toi_ysize_min
-        toi_ysize = toi_ysize_min + randint(0, min(extra, toi_ysize_max - toi_ysize_min))
+        extra = (ury - lly) - bed_ysize_min - bath_ysize_min
+        bath_ysize = bath_ysize_min + randint(0, min(extra, bath_ysize_max - bath_ysize_min))
 
-        toi = self.query_create_rect('toilet', llx, lly, urx, lly + toi_ysize)
-        bed = self.query_create_rect('bedroom', llx, lly + toi_ysize, urx, ury)
-        self.query_create_edge('adj', toi.b1_id, bed.b3_id)
+        bath = self.query_create_rect('bathroom', llx, lly, urx, lly + bath_ysize)
+        bed = self.query_create_rect('bedroom', llx, lly + bath_ysize, urx, ury)
+        self.query_create_edge('adj', bath.b1_id, bed.b3_id)
 
-        self.query_embed_western(sa.id, toi.id)
+        self.query_embed_western(sa.id, bath.id)
         self.query_embed_western(sa.id, bed.id)
 
         self.query_delete_rect(sa.id)
 
-        return 'sub-areas created, cut at Y={0}'.format(lly + toi_ysize)
+        return 'sub-areas created, cut at Y={0}'.format(lly + bath_ysize)
 
     def rule_p4(self):
         """
